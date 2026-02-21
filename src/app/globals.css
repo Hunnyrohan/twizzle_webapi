@@ -12,11 +12,26 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark mode via system preference (only when no explicit class) */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not(.light):not(.dark) {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
+}
+
+/* Dark mode via class (manual theme switching - highest priority) */
+:root.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+  color-scheme: dark;
+}
+
+/* Light mode via class (override system preference) */
+:root.light {
+  --background: #ffffff;
+  --foreground: #171717;
+  color-scheme: light;
 }
 
 body {
