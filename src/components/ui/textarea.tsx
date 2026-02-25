@@ -3,20 +3,20 @@
 import * as React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     label?: string;
     error?: string;
     variant?: 'floating' | 'standard';
 }
 
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, label, error, variant = 'floating', ...props }, ref) => {
+const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
+    ({ className, label, error, variant = 'floating', ...props }, ref) => {
         const [isFocused, setIsFocused] = React.useState(false);
         const [value, setValue] = React.useState(props.defaultValue || props.value || "");
 
         const isFloating = isFocused || (value && String(value).length > 0);
 
-        const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
             setValue(e.target.value);
             props.onChange?.(e);
         };
@@ -29,14 +29,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                             {label}
                         </label>
                     )}
-                    <input
-                        type={type}
+                    <textarea
                         className={`
-                            block w-full px-3 h-9 rounded-md
+                            block w-full px-3 py-1.5 rounded-md min-h-[80px]
                             text-gray-900 dark:text-white text-sm
                             bg-white dark:bg-zinc-950
                             border border-gray-300 dark:border-zinc-800
-                            focus:border-[#1d9bf0] focus:ring-1 focus:ring-[#1d9bf0]/20 transition-all outline-none
+                            focus:border-[#1d9bf0] focus:ring-1 focus:ring-[#1d9bf0]/20 transition-all outline-none resize-none
                             ${error ? "border-red-500 focus:ring-red-500/20" : ""}
                             ${className}
                         `}
@@ -72,14 +71,13 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         ${error ? "border-red-400 bg-red-50/30 ring-8 ring-red-400/5" : ""}
                     `}
                 >
-                    <div className="relative pt-7 pb-3 px-6 min-h-[72px] flex items-center">
-                        <input
-                            type={type}
+                    <div className="relative pt-7 pb-3 px-6 min-h-[120px] flex items-start">
+                        <textarea
                             className={`
                                 block w-full bg-transparent border-0 p-0 
                                 text-gray-950 dark:text-white text-[17px] font-bold tracking-tight
                                 placeholder-transparent focus:ring-0 focus:outline-none
-                                selection:bg-[#1d9bf0]/30
+                                selection:bg-[#1d9bf0]/30 resize-none
                                 ${className}
                             `}
                             ref={ref}
@@ -101,7 +99,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                                     absolute left-6 transition-all duration-250 ease-[0.2,1,0.3,1] pointer-events-none
                                     ${isFloating
                                         ? "text-[12px] top-3 text-[#1d9bf0] font-black uppercase tracking-widest"
-                                        : "text-[17px] top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 font-bold"}
+                                        : "text-[17px] top-7 text-gray-400 dark:text-zinc-500 font-bold"}
                                     ${error ? "text-red-500" : ""}
                                 `}
                             >
@@ -128,6 +126,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     }
 );
 
-Input.displayName = "Input";
+Textarea.displayName = "Textarea";
 
-export { Input };
+export { Textarea };
