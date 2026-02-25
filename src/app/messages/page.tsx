@@ -6,7 +6,7 @@ import { ChatWindow } from '@/components/messages/ChatWindow';
 import { messageService } from '@/services/api';
 import { Conversation, User } from '@/types/messages';
 import { Sidebar } from '@/components/dashboard/Sidebar';
-import { RightSidebar } from '@/components/dashboard/RightSidebar';
+import { RightPanel } from '@/components/dashboard/RightPanel';
 
 export default function MessagesPage() {
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -100,7 +100,7 @@ export default function MessagesPage() {
             {/* Right Sidebar (Optional / Reused) */}
             {/* We can hide it on smaller screens or if we want full width chat */}
             <div className="hidden xl:block w-[350px]">
-                <RightSidebar />
+                <RightPanel />
             </div>
         </div>
     );
