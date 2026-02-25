@@ -11,9 +11,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, initialQuery = '' }) =>
     const [query, setQuery] = useState(initialQuery);
     const debouncedQuery = useDebounce(query, 300);
 
+    // Sync internal state with prop if prop changes (e.g. redirected or clicked a trend)
     useEffect(() => {
-        onSearch(debouncedQuery);
-    }, [debouncedQuery, onSearch]);
+        if (initialQuery !== query) {
+            setQuery(initialQuery);
+        }
+    }, [initialQuery]);
+
+    useEffect(() => {
+        // Notify parent of new search term (debounced)
+        // Guard prevents infinite loops when syncing with URL state
+        if (debouncedQuery !== initialQuery) {
+            onSearch(debouncedQuery);
+        }
+    }, [debouncedQuery, onSearch, initialQuery]);
 
     const handleClear = () => {
         setQuery('');

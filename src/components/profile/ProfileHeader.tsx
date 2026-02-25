@@ -4,6 +4,7 @@ import React from 'react';
 import { User } from '@/types';
 import { ArrowLeft, Calendar, Link as LinkIcon, MapPin, Mail } from 'lucide-react';
 import Link from 'next/link';
+import VerifiedBadge from '../common/VerifiedBadge';
 
 interface ProfileHeaderProps {
     user: User;
@@ -21,12 +22,15 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, currentUser,
     return (
         <div>
             {/* Header */}
-            <div className="sticky top-0 bg-white/80 backdrop-blur-md px-4 py-3 border-b border-gray-200 z-10 flex items-center space-x-4">
-                <Link href="/dashboard" className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+            <div className="sticky top-0 bg-white/80 dark:bg-black/80 backdrop-blur-md px-4 py-3 border-b border-gray-200 dark:border-zinc-800 z-40 flex items-center space-x-4">
+                <Link href="/dashboard" className="p-2 hover:bg-gray-100 dark:hover:bg-zinc-900 rounded-full transition-colors">
                     <ArrowLeft size={20} />
                 </Link>
                 <div>
-                    <h1 className="text-xl font-bold leading-tight">{user.name}</h1>
+                    <div className="flex items-center space-x-1">
+                        <h1 className="text-xl font-bold leading-tight text-gray-900 dark:text-white">{user.name}</h1>
+                        {user.isVerified && <VerifiedBadge size={18} />}
+                    </div>
                     <p className="text-gray-500 text-sm">{postCount} posts</p>
                 </div>
             </div>
@@ -47,14 +51,14 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, currentUser,
                         <img
                             src={user.image || 'https://via.placeholder.com/150'}
                             alt={user.name}
-                            className="w-32 h-32 rounded-full border-4 border-white bg-white object-cover"
+                            className="w-32 h-32 rounded-full border-4 border-white dark:border-black bg-white dark:bg-zinc-900 object-cover"
                         />
                     </div>
                     <div className="mt-4">
                         {isOwnProfile ? (
                             <button
                                 onClick={onEditProfile}
-                                className="px-4 py-2 border border-gray-300 font-bold rounded-full hover:bg-gray-50 transition-colors"
+                                className="px-4 py-2 border border-gray-300 dark:border-zinc-700 font-bold rounded-full hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors dark:text-white"
                             >
                                 Edit profile
                             </button>
@@ -63,8 +67,8 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, currentUser,
                                 <button
                                     onClick={onFollow}
                                     className={`px-6 py-2 font-bold rounded-full transition-colors ${user.isFollowing
-                                        ? 'border border-gray-300 hover:bg-red-50 hover:text-red-600 hover:border-red-200 group'
-                                        : 'bg-black text-white hover:bg-gray-800'}`}
+                                        ? 'border border-gray-300 dark:border-zinc-700 hover:bg-red-50 dark:hover:bg-red-900/10 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 dark:hover:border-red-900/30 group dark:text-white'
+                                        : 'bg-black dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-200'}`}
                                 >
                                     <span className={user.isFollowing ? 'group-hover:hidden' : ''}>{user.isFollowing ? 'Following' : 'Follow'}</span>
                                     <span className={`hidden ${user.isFollowing ? 'group-hover:inline' : ''}`}>Unfollow</span>
@@ -83,7 +87,10 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, currentUser,
 
                 <div className="space-y-3">
                     <div>
-                        <h2 className="text-xl font-bold">{user.name}</h2>
+                        <div className="flex items-center space-x-1">
+                            <h2 className="text-xl font-bold">{user.name}</h2>
+                            {user.isVerified && <VerifiedBadge size={20} />}
+                        </div>
                         <p className="text-gray-500">@{user.username}</p>
                     </div>
 

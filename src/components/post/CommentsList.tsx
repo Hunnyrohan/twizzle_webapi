@@ -61,7 +61,7 @@ export const CommentsList: React.FC<CommentsListProps> = ({ postId, currentUser 
                     <Loader2 className="animate-spin text-blue-500" />
                 </div>
             ) : comments.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
+                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
                     No comments yet. Be the first to reply!
                 </div>
             ) : (
@@ -74,7 +74,7 @@ export const CommentsList: React.FC<CommentsListProps> = ({ postId, currentUser 
                         <button
                             onClick={handleLoadMore}
                             disabled={loadingMore}
-                            className="w-full p-4 text-blue-500 hover:bg-gray-50 transition-colors text-center disabled:opacity-50"
+                            className="w-full p-4 text-blue-500 hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors text-center disabled:opacity-50"
                         >
                             {loadingMore ? 'Loading...' : 'Show more replies'}
                         </button>
