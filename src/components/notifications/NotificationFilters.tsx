@@ -24,6 +24,7 @@ export const NotificationFilters: React.FC<NotificationFiltersProps> = ({
         { id: 'follows', label: 'Follows' },
         { id: 'comments', label: 'Comments' },
         { id: 'bookmarks', label: 'Bookmarks' },
+        { id: 'reposts', label: 'Reposts' },
     ];
 
     return (

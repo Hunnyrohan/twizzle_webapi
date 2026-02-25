@@ -2,49 +2,51 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
-type Theme = 'light' | 'dark' | 'system';
+type Theme = 'light' | 'dark';
 
 interface ThemeContextType {
     theme: Theme;
+    toggleTheme: () => void;
     setTheme: (theme: Theme) => void;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [theme, setTheme] = useState<Theme>('system');
+    const [theme, setThemeState] = useState<Theme>('light');
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
         const storedTheme = localStorage.getItem('theme') as Theme;
         if (storedTheme) {
-            setTheme(storedTheme);
+            setThemeState(storedTheme);
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setThemeState('dark');
         }
+        setMounted(true);
     }, []);
 
     useEffect(() => {
         if (!mounted) return;
-
         const root = window.document.documentElement;
         root.classList.remove('light', 'dark');
-
-        // Only add class for explicit light/dark choice
-        // For 'system', leave no class so CSS media query handles it
-        if (theme !== 'system') {
-            root.classList.add(theme);
-        }
-
+        root.classList.add(theme);
         localStorage.setItem('theme', theme);
     }, [theme, mounted]);
 
-    if (!mounted) {
-        return <>{children}</>;
-    }
+    const toggleTheme = () => {
+        setThemeState(prev => prev === 'light' ? 'dark' : 'light');
+    };
+
+    const setTheme = (newTheme: Theme) => {
+        setThemeState(newTheme);
+    };
 
     return (
-        <ThemeContext.Provider value={{ theme, setTheme }}>
-            {children}
+        <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+            <div style={{ opacity: mounted ? 1 : 0 }} className="transition-opacity duration-300">
+                {children}
+            </div>
         </ThemeContext.Provider>
     );
 };

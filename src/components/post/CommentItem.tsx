@@ -19,7 +19,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
     };
 
     return (
-        <div className="flex space-x-3 p-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+        <div className="flex space-x-3 p-4 border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors">
             <Link href={`/profile/${author.username}`} className="flex-shrink-0">
                 <img
                     src={author.image || 'https://via.placeholder.com/150'}
@@ -30,14 +30,14 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
             <div className="flex-1 min-w-0">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 text-sm">
-                        <Link href={`/profile/${author.username}`} className="font-bold text-gray-900 hover:underline">
+                        <Link href={`/profile/${author.username}`} className="font-bold text-gray-900 dark:text-white hover:underline">
                             {author.name}
                         </Link>
                         <span className="text-gray-500">@{author.username}</span>
                         <span className="text-gray-500">· {timeAgo}</span>
                     </div>
                 </div>
-                <p className="text-gray-900 mt-1 whitespace-pre-wrap break-words text-base">
+                <p className="text-gray-900 dark:text-gray-100 mt-1 whitespace-pre-wrap break-words text-base">
                     {comment.content}
                 </p>
 

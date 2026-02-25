@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '@/lib/api';
-import { Loader2, Send } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { User, Comment } from '@/types';
 
 interface CommentComposerProps {
@@ -27,7 +27,6 @@ export const CommentComposer: React.FC<CommentComposerProps> = ({ postId, curren
             setContent('');
         } catch (error) {
             console.error('Failed to post comment', error);
-            // Could add toast error here
         } finally {
             setSubmitting(false);
         }
@@ -35,14 +34,14 @@ export const CommentComposer: React.FC<CommentComposerProps> = ({ postId, curren
 
     if (!currentUser) {
         return (
-            <div className="p-4 border-b border-gray-200 bg-gray-50 text-center text-gray-500">
+            <div className="p-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900 text-center text-gray-500">
                 Please login to comment.
             </div>
         );
     }
 
     return (
-        <div className="p-4 border-b border-gray-200 flex space-x-3">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex space-x-3">
             <div className="flex-shrink-0">
                 <img
                     src={currentUser.image || 'https://via.placeholder.com/150'}
@@ -52,12 +51,12 @@ export const CommentComposer: React.FC<CommentComposerProps> = ({ postId, curren
             </div>
             <div className="flex-1">
                 <textarea
-                    className="w-full border-none focus:ring-0 resize-none text-lg placeholder-gray-500 min-h-[80px]"
+                    className="w-full border-none focus:ring-0 resize-none text-lg placeholder-gray-500 dark:placeholder-gray-600 min-h-[80px] bg-transparent text-gray-900 dark:text-white outline-none"
                     placeholder="Post your reply"
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                 />
-                <div className="flex justify-between items-center mt-2 border-t border-gray-100 pt-2">
+                <div className="flex justify-between items-center mt-2 border-t border-gray-100 dark:border-gray-800 pt-2">
                     <div className={`text-sm ${isOverLimit ? 'text-red-500' : 'text-gray-400'}`}>
                         {content.length}/{maxLength}
                     </div>

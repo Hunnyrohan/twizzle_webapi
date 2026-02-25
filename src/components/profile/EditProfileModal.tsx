@@ -5,6 +5,7 @@ import { User } from '@/types';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { X, Camera } from 'lucide-react';
 
 interface EditProfileModalProps {
@@ -125,8 +126,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ user, isOpen
                     <Button
                         onClick={handleSubmit}
                         disabled={isLoading}
-                        variant="twitter_black"
-                        className="px-4 py-1.5 min-h-0 h-auto text-sm"
+                        className="bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold px-5 py-1.5 min-h-0 h-auto text-sm rounded-full shadow-sm transition-all active:scale-95"
                     >
                         {isLoading ? 'Saving...' : 'Save'}
                     </Button>
@@ -179,39 +179,31 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ user, isOpen
                     </div>
 
                     {/* Form Fields */}
-                    <div className="px-4 space-y-4 pb-8">
-                        <div className="border border-gray-300 rounded px-2 py-1 focus-within:ring-2 ring-blue-500">
-                            <label className="block text-xs text-gray-500">Name</label>
-                            <input
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full outline-none bg-transparent"
-                            />
-                        </div>
-                        <div className="border border-gray-300 rounded px-2 py-1 focus-within:ring-2 ring-blue-500">
-                            <label className="block text-xs text-gray-500">Bio</label>
-                            <textarea
-                                value={bio}
-                                onChange={(e) => setBio(e.target.value)}
-                                className="w-full outline-none bg-transparent resize-none h-20"
-                            />
-                        </div>
-                        <div className="border border-gray-300 rounded px-2 py-1 focus-within:ring-2 ring-blue-500">
-                            <label className="block text-xs text-gray-500">Location</label>
-                            <input
-                                value={location}
-                                onChange={(e) => setLocation(e.target.value)}
-                                className="w-full outline-none bg-transparent"
-                            />
-                        </div>
-                        <div className="border border-gray-300 rounded px-2 py-1 focus-within:ring-2 ring-blue-500">
-                            <label className="block text-xs text-gray-500">Website</label>
-                            <input
-                                value={website}
-                                onChange={(e) => setWebsite(e.target.value)}
-                                className="w-full outline-none bg-transparent"
-                            />
-                        </div>
+                    <div className="px-4 space-y-4 pb-8 mt-4">
+                        <Input
+                            label="Name"
+                            value={name}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setName(e.target.value)}
+                            variant="standard"
+                        />
+                        <Textarea
+                            label="Bio"
+                            value={bio}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setBio(e.target.value)}
+                            variant="standard"
+                        />
+                        <Input
+                            label="Location"
+                            value={location}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setLocation(e.target.value)}
+                            variant="standard"
+                        />
+                        <Input
+                            label="Website"
+                            value={website}
+                            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setWebsite(e.target.value)}
+                            variant="standard"
+                        />
                     </div>
                 </div>
             </div>

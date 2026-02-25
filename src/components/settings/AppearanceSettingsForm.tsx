@@ -3,12 +3,14 @@
 import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import api from '@/lib/api';
+import { Moon, Sun } from 'lucide-react';
 
 export const AppearanceSettingsForm: React.FC = () => {
-    const { theme, setTheme } = useTheme();
+    const { theme, toggleTheme } = useTheme();
 
-    const handleThemeChange = async (newTheme: 'light' | 'dark' | 'system') => {
-        setTheme(newTheme);
+    const handleToggle = async () => {
+        const newTheme = theme === 'light' ? 'dark' : 'light';
+        toggleTheme();
         try {
             await api.patch('/settings/me', { theme: newTheme });
         } catch (error) {
@@ -17,35 +19,36 @@ export const AppearanceSettingsForm: React.FC = () => {
     };
 
     return (
-        <div className="space-y-6 max-w-xl">
-            <h2 className="text-xl font-bold mb-4">Appearance</h2>
-            <p className="text-gray-500 mb-6">Manage your display preferences and theme.</p>
+        <div className="max-w-2xl space-y-5">
+            <div className="pb-3 border-b border-gray-100 dark:border-zinc-800">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">Appearance</h2>
+                <p className="text-xs text-gray-500">Manage how the app looks on this device.</p>
+            </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="bg-white dark:bg-zinc-950/40 border border-gray-100 dark:border-zinc-800 rounded-xl overflow-hidden shadow-sm">
                 <button
-                    onClick={() => handleThemeChange('light')}
-                    className={`p-4 rounded-xl border-2 flex flex-col items-center space-y-2 ${theme === 'light' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}
+                    onClick={handleToggle}
+                    className="w-full px-5 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-zinc-900/40 transition-colors group"
                 >
-                    <div className="w-full h-20 bg-white border border-gray-200 rounded-lg shadow-sm"></div>
-                    <span className="font-bold">Light</span>
-                </button>
+                    <div className="flex items-center gap-4">
+                        <div className={`p-2 rounded-lg ${theme === 'dark' ? 'bg-[#1d9bf0]/10 text-[#1d9bf0]' : 'bg-gray-100 text-gray-500'}`}>
+                            {theme === 'dark' ? <Moon size={20} /> : <Sun size={20} />}
+                        </div>
+                        <div className="text-left">
+                            <h3 className="text-[15px] font-bold text-gray-900 dark:text-white">Dark Mode</h3>
+                            <p className="text-xs text-gray-500">Switch between light and dark themes</p>
+                        </div>
+                    </div>
 
-                <button
-                    onClick={() => handleThemeChange('dark')}
-                    className={`p-4 rounded-xl border-2 flex flex-col items-center space-y-2 ${theme === 'dark' ? 'border-blue-500 bg-gray-900' : 'border-gray-200 hover:border-blue-200'}`}
-                >
-                    <div className="w-full h-20 bg-black border border-gray-700 rounded-lg shadow-sm"></div>
-                    <span className={`font-bold ${theme === 'dark' ? 'text-white' : ''}`}>Dark</span>
-                </button>
-
-                <button
-                    onClick={() => handleThemeChange('system')}
-                    className={`p-4 rounded-xl border-2 flex flex-col items-center space-y-2 ${theme === 'system' ? 'border-blue-500 bg-blue-50 dark:bg-gray-900' : 'border-gray-200 hover:border-blue-200'}`}
-                >
-                    <div className="w-full h-20 bg-gradient-to-r from-white to-black border border-gray-200 rounded-lg shadow-sm"></div>
-                    <span className="font-bold">System</span>
+                    <div className={`w-11 h-6 rounded-full relative transition-colors duration-200 ease-in-out ${theme === 'dark' ? 'bg-[#1d9bf0]' : 'bg-gray-200 dark:bg-zinc-800'}`}>
+                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-transform duration-200 ease-in-out ${theme === 'dark' ? 'translate-x-5' : 'translate-x-0'}`} />
+                    </div>
                 </button>
             </div>
+
+            <p className="text-[11px] text-gray-500 font-medium tracking-tight px-1">
+                Your preference is automatically saved to your profile and synced across devices.
+            </p>
         </div>
     );
 };

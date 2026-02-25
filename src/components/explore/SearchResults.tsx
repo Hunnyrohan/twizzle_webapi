@@ -75,14 +75,31 @@ const SearchResults: React.FC<SearchResultsProps> = ({ query, filter }) => {
         <div className="pb-20">
             <div className={filter === 'tags' || filter === 'people' ? 'space-y-4 p-4' : ''}>
                 {items.map((item: any) => {
-                    if (filter === 'users' || filter === 'people') { // 'people' is the tab id
-                        return <UserCard key={item._id || item.id} user={item} />;
-                    } else if (filter === 'tags') {
-                        return <TagCard key={item.tag} tag={item} />;
-                    } else {
-                        // PostCard
-                        return <PostCard key={item._id || item.id} post={item} />;
+                    const id = item._id || item.id || item.tag;
+
+                    // If it's the people tab, always render UserCard
+                    if (filter === 'users' || filter === 'people') {
+                        return <UserCard key={id} user={item} />;
                     }
+
+                    // If it's the tags tab, always render TagCard
+                    if (filter === 'tags') {
+                        return <TagCard key={id} tag={item} />;
+                    }
+
+                    // For 'top' or 'latest', it could be mixed (case of 'top')
+                    // Check if it's a user by looking for username
+                    if (item.username && !item.content) {
+                        return <UserCard key={id} user={item} />;
+                    }
+
+                    // Check if it's a hashtag
+                    if (item.tag && !item.content) {
+                        return <TagCard key={id} tag={item} />;
+                    }
+
+                    // Default to PostCard
+                    return <PostCard key={id} post={item} />;
                 })}
             </div>
 

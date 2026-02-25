@@ -2,13 +2,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import api from '@/lib/api';
 import { Post, User } from '@/types';
 import { PostCard } from '@/components/dashboard/PostCard';
 import { CommentsList } from '@/components/post/CommentsList';
 import { PostDetailSkeleton } from '@/components/post/PostDetailSkeleton';
 import { ArrowLeft } from 'lucide-react';
-import { RightPanel } from '@/components/dashboard/RightPanel'; // Reuse existing right panel
 
 export default function PostDetailPage() {
     const params = useParams();
@@ -47,18 +47,14 @@ export default function PostDetailPage() {
         }
     }, [postId]);
 
-    const handleBack = () => {
-        router.back();
-    };
-
     if (error) {
         return (
-            <div className="min-h-screen bg-black/5 flex items-center justify-center">
-                <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-md w-full">
-                    <h2 className="text-2xl font-bold mb-2 text-gray-800">
+            <div className="flex items-center justify-center p-8">
+                <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl text-center max-w-md w-full border border-gray-100 dark:border-gray-800">
+                    <h2 className="text-2xl font-bold mb-2 text-gray-800 dark:text-white">
                         {error === 'Post not found' ? 'Hmm... this post doesn’t exist.' : 'Something went wrong.'}
                     </h2>
-                    <p className="text-gray-500 mb-6">
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">
                         Try searching for something else.
                     </p>
                     <button
@@ -73,60 +69,35 @@ export default function PostDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-white">
-            {/* We rely on the layout.tsx (Dashboard Layout) if this page is inside (dashboard) group, 
-                 but user asked for /post/:postId route. 
-                 If /post is at root, we need to supply layout here or assume root layout handles sidebar.
-                 Assuming root layout.tsx provides structure, but if it's missing Sidebar context, we might need a layout wrapper.
-                 Given 'src/app/dashboard/layout.tsx' exists, /post likely sits outside dashboard layout visually unless we wrap it.
-                 However, user requirement: "Layout: Same 3-column layout: Left: sticky Sidebar...".
-                 Reusing DashboardLayout would be best.
-                 BUT Next.js App Router: if /post is valid root, it won't inherit dashboard layout.
-                 I should check if I can reuse components.
-                 For now, I'll layout purely here or assume global layout.
-                 Let's check `src/app/layout.tsx`. 
-              */}
-            <div className="container mx-auto max-w-7xl min-h-screen">
-                <div className="flex justify-center">
-                    {/* Placeholder for Left Sidebar if not in layout. 
-                         The prompt implies a full page.
-                         I'll stick to rendering the center content primarily.
-                         Ideally, we'd move this page to /dashboard/post/[id] to reuse layout, 
-                         but route /post/:postId was requested.
-                         I'll assume Global Layout handles it OR I'll add a simple wrapper if I had Sidebar component access.
-                         I verified `RightPanel` exists.
-                      */}
-
-                    {/* Left Sidebar (Hidden/Placeholder - assuming layout handles or not requested explicitly to duplicate sidebar code) */}
-
-                    {/* Main Content */}
-                    <main className="w-full max-w-2xl border-x border-gray-200 min-h-screen">
-                        {/* Header */}
-                        <div className="sticky top-0 bg-white/80 backdrop-blur-md px-4 py-3 border-b border-gray-200 z-10 flex items-center space-x-4">
-                            <button onClick={handleBack} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                                <ArrowLeft size={20} />
-                            </button>
-                            <h1 className="text-xl font-bold">Post</h1>
-                        </div>
-
-                        {loading ? (
-                            <PostDetailSkeleton />
-                        ) : post ? (
-                            <>
-                                <PostCard post={post} isDetail={true} />
-                                <CommentsList postId={post._id} currentUser={currentUser} />
-                            </>
-                        ) : null}
-                    </main>
-
-                    {/* Right Panel */}
-                    <div className="hidden lg:block w-[350px] pl-8">
-                        <div className="sticky top-0 pt-2 h-screen">
-                            <RightPanel />
-                        </div>
-                    </div>
-                </div>
+        <div className="min-h-screen bg-white dark:bg-black">
+            {/* Header */}
+            <div className="sticky top-0 bg-white/90 dark:bg-black/90 backdrop-blur-md px-4 py-3 border-b border-gray-200 dark:border-gray-800 z-10 flex items-center space-x-4 text-gray-900 dark:text-white">
+                <Link
+                    href="/dashboard"
+                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors flex items-center justify-center text-gray-900 dark:text-white"
+                    aria-label="Back"
+                    onClick={(e) => {
+                        // If we have history, use it to preserve scroll pos, 
+                        // otherwise let the Link handle navigation to /dashboard
+                        if (typeof window !== 'undefined' && window.history.length > 1) {
+                            e.preventDefault();
+                            router.back();
+                        }
+                    }}
+                >
+                    <ArrowLeft size={20} />
+                </Link>
+                <h1 className="text-xl font-bold">Post</h1>
             </div>
+
+            {loading ? (
+                <PostDetailSkeleton />
+            ) : post ? (
+                <>
+                    <PostCard post={post} isDetail={true} />
+                    <CommentsList postId={post._id} currentUser={currentUser} />
+                </>
+            ) : null}
         </div>
     );
 }

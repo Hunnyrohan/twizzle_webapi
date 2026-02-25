@@ -4,8 +4,9 @@ import React, { useState } from 'react';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { LogOut } from 'lucide-react';
+import { LogOut, ShieldAlert, KeyRound } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 
 export const SecuritySettingsForm: React.FC = () => {
     const router = useRouter();
@@ -54,48 +55,71 @@ export const SecuritySettingsForm: React.FC = () => {
     };
 
     return (
-        <div className="space-y-8 max-w-xl">
-            <form onSubmit={handleChangePassword} className="space-y-4">
-                <h2 className="text-xl font-bold mb-4">Change Password</h2>
-                <Input
-                    type="password"
-                    label="Current Password"
-                    name="currentPassword"
-                    value={passwords.currentPassword}
-                    onChange={handleChange}
-                />
-                <Input
-                    type="password"
-                    label="New Password"
-                    name="newPassword"
-                    value={passwords.newPassword}
-                    onChange={handleChange}
-                />
-                <Input
-                    type="password"
-                    label="Confirm New Password"
-                    name="confirmNewPassword"
-                    value={passwords.confirmNewPassword}
-                    onChange={handleChange}
-                />
-                <Button type="submit" variant="twitter_black" isLoading={isLoading} disabled={isLoading}>
-                    Update Password
-                </Button>
-            </form>
+        <div className="max-w-2xl space-y-6">
+            <section className="space-y-4">
+                <div className="pb-3 border-b border-gray-100 dark:border-zinc-800">
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">Security Settings</h2>
+                    <p className="text-xs text-gray-500">Update your password and manage account security.</p>
+                </div>
 
-            <div className="pt-8 border-t border-gray-200 dark:border-gray-800">
-                <h2 className="text-xl font-bold mb-4 text-red-600">Danger Zone</h2>
-                <div className="bg-red-50 dark:bg-red-900/10 p-4 rounded-lg flex items-center justify-between">
-                    <div>
-                        <h3 className="font-bold">Log out all devices</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Log out of all other active sessions.</p>
+                <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
+                    <div className="space-y-3">
+                        <Input
+                            type="password"
+                            label="Current Password"
+                            name="currentPassword"
+                            value={passwords.currentPassword}
+                            onChange={handleChange}
+                            variant="standard"
+                        />
+                        <Input
+                            type="password"
+                            label="New Password"
+                            name="newPassword"
+                            value={passwords.newPassword}
+                            onChange={handleChange}
+                            variant="standard"
+                        />
+                        <Input
+                            type="password"
+                            label="Confirm New Password"
+                            name="confirmNewPassword"
+                            value={passwords.confirmNewPassword}
+                            onChange={handleChange}
+                            variant="standard"
+                        />
                     </div>
-                    <Button onClick={handleLogoutAll} variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">
-                        <LogOut size={16} className="mr-2" />
-                        Logout All
+                    <div className="pt-1">
+                        <Button
+                            type="submit"
+                            isLoading={isLoading}
+                            disabled={isLoading}
+                            className="h-9 px-8 rounded-md bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white font-bold text-sm shadow-sm transition-all active:scale-95"
+                        >
+                            Update Password
+                        </Button>
+                    </div>
+                </form>
+            </section>
+
+            <section className="pt-6 border-t border-gray-100 dark:border-zinc-800">
+                <h3 className="text-lg font-bold text-red-500 mb-3 flex items-center gap-2">
+                    Danger Zone
+                </h3>
+                <div className="border border-red-100/50 dark:border-red-900/20 p-4 rounded-xl bg-red-50/30 dark:bg-red-900/10 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="text-center md:text-left">
+                        <h4 className="border-0 font-bold text-gray-900 dark:text-white mb-0.5 text-sm">Log out of all other sessions</h4>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">This will sign you out of all devices except for this one.</p>
+                    </div>
+                    <Button
+                        onClick={handleLogoutAll}
+                        variant="outline"
+                        className="h-9 px-5 rounded-md border-red-200 text-red-600 hover:bg-red-600 hover:text-white transition-all font-bold text-sm"
+                    >
+                        Logout All Sessions
                     </Button>
                 </div>
-            </div>
+            </section>
         </div>
     );
 };
