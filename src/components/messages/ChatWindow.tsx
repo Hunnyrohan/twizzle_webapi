@@ -1,10 +1,13 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { Conversation, Message } from '@/types/messages';
 import { messageService } from '@/services/api';
 import { MessageBubble } from './MessageBubble';
 import { MessageComposer } from './MessageComposer';
 import { MessageSkeleton } from './MessagesSkeleton';
-import { ArrowLeft, Info, MoreHorizontal } from 'lucide-react';
+import VerifiedBadge from '../common/VerifiedBadge';
+import { ArrowLeft, Info, MoreHorizontal, Video, Phone } from 'lucide-react';
+import { useSocket } from '@/context/SocketContext';
+import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
 
 interface ChatWindowProps {
@@ -26,9 +29,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const [cursor, setCursor] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState(true);
 
+    const { socket, initiateCall } = useSocket();
+    const { user } = useAuth();
+
     const bottomRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const scrollHeightRef = useRef<number>(0);
+
+    useEffect(() => {
+        if (socket && user?.id) {
+            socket.emit('join', user.id);
+        }
+    }, [socket, user?.id]);
 
     const fetchMessages = async (isLoadOlder = false) => {
         try {
@@ -51,10 +63,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 }
 
             } else {
-                setMessages(response.items); // reverse not needed if API returns newest first? API returns newest first in list (index 0). 
-                // We render list from top (index 0) to bottom? 
-                // Typical chat renders newest at bottom.
-                // If API returns [Newest, ..., Oldest], we should reverse it to render top-to-bottom as [Oldest, ..., Newest].
+                setMessages(response.items);
             }
 
             setCursor(response.nextCursor || null);
@@ -98,7 +107,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
         }
     }, [messages.length, loading]);
 
-    const handleSend = async (text: string) => {
+    const handleSend = async (text: string, files: File[]) => {
+        const formData = new FormData();
+        if (text) formData.append('text', text);
+        files.forEach(file => {
+            formData.append('images', file);
+        });
+
         // Optimistic update
         const tempId = 'temp_' + Date.now();
         const tempMsg: Message = {
@@ -106,24 +121,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             conversationId: conversation.id,
             senderId: currentUserId,
             text,
+            attachments: files.map(f => URL.createObjectURL(f)),
             createdAt: new Date().toISOString(),
             status: 'sent'
         };
 
-        setMessages(prev => [tempMsg, ...prev]); // Add to top if using flex-col-reverse or similar
-        // Wait, if I rendering normally, I should put it at the END if array is [Oldest, ..., Newest]
-        // My API returns [Newest, ..., Oldest].
-        // So `messages[0]` is the Newest.
-        // So I should prepend.
+        setMessages(prev => [tempMsg, ...prev]);
 
         try {
-            const sentMsg = await messageService.sendMessage(conversation.id, text);
+            const sentMsg = await messageService.sendMessage(conversation.id, formData);
             // Replace temp
             setMessages(prev => prev.map(m => m.id === tempId ? sentMsg : m));
             onMessageSent();
         } catch (error) {
             console.error('Failed to send', error);
-            // Remove temp or show error
             setMessages(prev => prev.filter(m => m.id !== tempId));
         }
     };
@@ -133,6 +144,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
             scrollHeightRef.current = messagesContainerRef.current.scrollHeight;
         }
         fetchMessages(true);
+    };
+
+    const handleCall = async (type: 'audio' | 'video') => {
+        await initiateCall(conversation.otherUser.id, conversation.otherUser.name, type, conversation.id, conversation.otherUser.isVerified, conversation.otherUser.image);
     };
 
     // Render order: 
@@ -159,21 +174,28 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                     <div className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-xl transition-colors cursor-pointer group">
                         <div className="relative">
                             <img
-                                src={conversation.otherUser.avatar || `https://ui-avatars.com/api/?name=${conversation.otherUser.name}`}
+                                src={conversation.otherUser.image || `https://ui-avatars.com/api/?name=${conversation.otherUser.name}`}
                                 alt={conversation.otherUser.name}
                                 className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 object-cover shadow-sm ring-2 ring-white dark:ring-black"
                             />
                             <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white dark:border-black rounded-full shadow-xs"></div>
                         </div>
                         <div className="ml-3">
-                            <h3 className="font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-blue-500 transition-colors">
+                            <h3 className="font-bold text-gray-900 dark:text-gray-100 leading-tight group-hover:text-blue-500 transition-colors flex items-center gap-1">
                                 {conversation.otherUser.name}
+                                {conversation.otherUser.isVerified && <VerifiedBadge size={16} />}
                             </h3>
                             <p className="text-xs text-gray-500 dark:text-gray-500 font-medium">@{conversation.otherUser.username}</p>
                         </div>
                     </div>
                 </div>
                 <div className="flex items-center space-x-1">
+                    <button onClick={() => handleCall('audio')} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-all">
+                        <Phone size={20} />
+                    </button>
+                    <button onClick={() => handleCall('video')} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-all">
+                        <Video size={20} />
+                    </button>
                     <button className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-all">
                         <Info size={22} />
                     </button>
@@ -244,6 +266,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
             {/* Composer */}
             <MessageComposer onSend={handleSend} />
-        </div>
+        </div >
     );
 };

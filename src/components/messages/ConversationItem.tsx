@@ -1,6 +1,7 @@
 import React from 'react';
 import { Conversation } from '@/types/messages';
 import { formatDistanceToNow } from 'date-fns';
+import VerifiedBadge from '../common/VerifiedBadge';
 
 interface ConversationItemProps {
     conversation: Conversation;
@@ -25,7 +26,7 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
 
             <div className="relative flex-shrink-0">
                 <img
-                    src={otherUser.avatar || `https://ui-avatars.com/api/?name=${otherUser.name}`}
+                    src={otherUser.image || `https://ui-avatars.com/api/?name=${otherUser.name}`}
                     alt={otherUser.name}
                     className={`w-14 h-14 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-black transition-transform duration-300 group-hover:scale-105 ${isActive ? 'ring-blue-100 dark:ring-blue-900/30' : 'bg-gray-200 dark:bg-gray-800'
                         }`}
@@ -36,8 +37,9 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
 
             <div className="ml-3.5 flex-1 min-w-0">
                 <div className="flex justify-between items-center">
-                    <h4 className={`font-bold truncate text-[15px] ${unreadCount > 0 ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
+                    <h4 className={`font-bold truncate text-[15px] flex items-center gap-1 ${unreadCount > 0 ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
                         {otherUser.name}
+                        {otherUser.isVerified && <VerifiedBadge size={14} />}
                     </h4>
                     <span className={`text-[11px] font-medium whitespace-nowrap ml-2 ${unreadCount > 0 ? 'text-blue-500' : 'text-gray-400 dark:text-gray-500'}`}>
                         {lastMessage?.createdAt ? formatDistanceToNow(new Date(lastMessage.createdAt), { addSuffix: false }).replace('about ', '') : ''}
@@ -49,7 +51,10 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
                         {lastMessage?.status === 'sent' && lastMessage.senderId !== otherUser.id && (
                             <span className="text-gray-400 dark:text-gray-600 font-normal">You: </span>
                         )}
-                        {lastMessage?.text || 'Started a conversation'}
+                        {lastMessage?.type === 'call'
+                            ? `${lastMessage.callData?.type === 'video' ? 'Video' : 'Voice'} call ${lastMessage.callData?.status === 'missed' ? 'missed' : 'ended'}`
+                            : (lastMessage?.text || 'Started a conversation')
+                        }
                     </p>
 
                     {unreadCount > 0 && (
