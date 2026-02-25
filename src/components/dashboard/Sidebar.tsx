@@ -4,35 +4,34 @@ import React from 'react';
 import { Home, Hash, Bell, Mail, User, Settings, LogOut, MoreHorizontal, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 import { messageService, notificationService } from '@/services/api';
+import { useModal } from '@/context/ModalContext';
+import { usePathname } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
 
 interface SidebarProps {
     user?: { name: string; username: string };
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
-    const [user, setUser] = React.useState<{ name: string; username: string } | undefined>(initialUser);
+    const { user: authUser } = useAuth();
+    const [user, setUser] = React.useState<{ name: string; username: string } | undefined>(initialUser || authUser || undefined);
     const [unreadMessages, setUnreadMessages] = React.useState(0);
     const [unreadNotifications, setUnreadNotifications] = React.useState(0);
+    const { openPostModal } = useModal();
+    const pathname = usePathname();
 
     React.useEffect(() => {
         if (!user) {
-            // Try to get from localStorage or fetch
-            // For now, let's mock it or try to fetch if we had an endpoint
-            // api.get('/auth/me').then(res => setUser(res.data.data)).catch(console.error);
-
-            // To make it look "Complete", let's show a placeholder if missing
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
                 try {
                     setUser(JSON.parse(storedUser));
                 } catch (e) { }
             } else {
-                // Fallback for demo completeness
                 setUser({ name: 'Demo User', username: 'demo_user' });
             }
         }
 
-        // Fetch unread counts
         const fetchUnread = async () => {
             try {
                 const [msgCount, notifCount] = await Promise.all([
@@ -47,10 +46,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
         };
 
         fetchUnread();
-        // Refresh every 30 seconds (mock real-time)
         const interval = setInterval(fetchUnread, 30000);
         return () => clearInterval(interval);
-    }, []);
+    }, [authUser]);
 
     const navItems = [
         { icon: Home, label: 'Home', href: '/dashboard' },
@@ -73,7 +71,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
                     <Link
                         key={item.label}
                         href={item.href}
-                        className="flex items-center space-x-4 px-4 py-3 text-xl font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors"
+                        className={`flex items-center space-x-4 px-4 py-3 text-xl font-medium rounded-full transition-colors ${pathname === item.href
+                                ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/10'
+                                : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900'
+                            }`}
                     >
                         <item.icon className="w-7 h-7" />
                         <span className="relative">
@@ -97,30 +98,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
                         localStorage.removeItem('user');
                         window.location.href = '/login';
                     }}
-                    className="flex items-center space-x-4 px-4 py-3 text-xl font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors w-full text-left"
+                    className="flex items-center space-x-4 px-4 py-3 text-xl font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full transition-colors w-full text-left cursor-pointer"
                 >
                     <LogOut className="w-7 h-7" />
                     <span>Logout</span>
                 </button>
             </nav>
 
-            <button className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg w-full mb-8">
+            <button
+                onClick={openPostModal}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-8 rounded-full shadow-lg text-lg w-full mb-8 cursor-pointer transition-all active:scale-95"
+            >
                 Post
             </button>
 
             {user && (
-                <div className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full cursor-pointer">
+                <Link
+                    href={`/profile/${user.username}`}
+                    className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full cursor-pointer mt-auto transition-colors"
+                >
                     <img
                         src={(user as any).image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
                         alt={user.name}
-                        className="w-10 h-10 rounded-full flex-shrink-0 object-cover bg-gray-200 dark:bg-gray-800"
+                        className="w-10 h-10 rounded-full flex-shrink-0 object-cover bg-gray-200 dark:bg-gray-800 border dark:border-gray-700"
                     />
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-900 dark:text-white truncate">{user.name}</p>
-                        <p className="text-gray-500 truncate">@{user.username}</p>
+                        <p className="text-gray-500 truncate text-sm">@{user.username}</p>
                     </div>
                     <MoreHorizontal className="w-5 h-5 text-gray-500" />
-                </div>
+                </Link>
             )}
         </aside>
     );
