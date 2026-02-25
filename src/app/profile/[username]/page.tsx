@@ -63,13 +63,11 @@ export default function UserProfilePage() {
             // Determine endpoint or params based on tab
             // For now, only 'posts' and 'likes' might fetch different things
             let endpoint = '/tweets';
-            let params: any = { author: userId };
+            let params: any = { author: userId, filter: tab };
 
             if (tab === 'likes') {
                 endpoint = `/users/${username}/likes`;
-                params = {}; // Likes endpoint usually gets user by username/id from path
-            } else if (tab === 'media') {
-                // params.hasMedia = true; // If supported
+                params = {};
             }
 
             const postsRes = await api.get<{ success: boolean, data: Post[] }>(endpoint, { params });
@@ -181,7 +179,13 @@ export default function UserProfilePage() {
             {/* Feed */}
             <div>
                 {posts.length > 0 ? (
-                    posts.map(post => <PostCard key={post._id} post={post} />)
+                    posts.map(post => (
+                        <PostCard
+                            key={post._id}
+                            post={post}
+                            onDelete={(postId) => setPosts(prev => prev.filter(p => p._id !== postId))}
+                        />
+                    ))
                 ) : (
                     <div className="p-8 text-center text-gray-500">
                         No items to display here yet.

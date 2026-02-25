@@ -19,7 +19,7 @@ api.interceptors.request.use(
     },
     (error) => Promise.reject(error)
 
-    
+
 );
 
 // Response interceptor for error handling
@@ -30,5 +30,23 @@ api.interceptors.response.use(
         return Promise.reject(error);
     }
 );
+
+export const blockService = {
+    toggleBlock: async (userId: string) => {
+        const response = await api.post(`/blocks/${userId}/toggle`);
+        return response.data.data;
+    }
+};
+
+export const paymentService = {
+    initiateVerification: async () => {
+        const response = await api.post('/payments/esewa/verification/initiate');
+        return response.data;
+    },
+    confirmVerification: async (data: string) => {
+        const response = await api.get('/payments/esewa/verification/confirm', { params: { data } });
+        return response.data;
+    }
+};
 
 export default api;

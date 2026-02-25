@@ -20,6 +20,9 @@ export const metadata: Metadata = {
 };
 
 import { AuthProvider } from "@/context/AuthContext";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { SocketProvider } from "@/context/SocketContext";
+import { ModalProvider } from "@/context/ModalContext";
 
 export default function RootLayout({
   children,
@@ -31,11 +34,17 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || ""}>
           <AuthProvider>
-            <LayoutWrapper>{children}</LayoutWrapper>
+            <SocketProvider>
+              <ThemeProvider>
+                <ModalProvider>
+                  <LayoutWrapper>{children}</LayoutWrapper>
+                </ModalProvider>
+              </ThemeProvider>
+            </SocketProvider>
           </AuthProvider>
-        </ThemeProvider>
+        </GoogleOAuthProvider>
       </body>
     </html>
   );

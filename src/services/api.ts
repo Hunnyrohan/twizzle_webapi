@@ -46,7 +46,7 @@ export const exploreService = {
     },
 };
 
-import { Conversation, Message, PaginatedResponse } from '../types/messages';
+import { Conversation, Message, PaginatedMessageResponse } from '../types/messages';
 
 export const messageService = {
     getConversations: async () => {
@@ -58,16 +58,21 @@ export const messageService = {
         return response.data.data;
     },
     getMessages: async (conversationId: string, cursor?: string, limit: number = 20) => {
-        const response = await api.get<{ success: boolean; data: PaginatedResponse<Message> }>(
+        const response = await api.get<{ success: boolean; data: PaginatedMessageResponse<Message> }>(
             '/messages/conversations/' + conversationId + '/messages',
             { params: { cursor, limit } }
         );
         return response.data.data;
     },
-    sendMessage: async (conversationId: string, text: string) => {
+    sendMessage: async (conversationId: string, formData: FormData) => {
         const response = await api.post<{ success: boolean; data: Message }>(
             '/messages/conversations/' + conversationId + '/messages',
-            { text }
+            formData,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            }
         );
         return response.data.data;
     },
