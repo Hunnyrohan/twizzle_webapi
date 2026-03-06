@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Phone, PhoneOff, Video, VideoOff, Mic, MicOff } from 'lucide-react';
 import VerifiedBadge from '../common/VerifiedBadge';
+import { resolveImageUrl } from '@/lib/media-utils';
 
 interface CallModalProps {
     type: 'audio' | 'video';
@@ -72,7 +73,7 @@ export const CallModal: React.FC<CallModalProps> = ({
                             <div className="relative mb-6">
                                 {callerImage ? (
                                     <img
-                                        src={callerImage.startsWith('http') ? callerImage : (callerImage.startsWith('/') ? `http://localhost:5000${callerImage}` : `http://localhost:5000/${callerImage}`)}
+                                        src={resolveImageUrl(callerImage)}
                                         alt={callerName}
                                         className="w-32 h-32 rounded-full object-cover border-4 border-blue-500/30 shadow-2xl"
                                     />

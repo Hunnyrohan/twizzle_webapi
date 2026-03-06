@@ -8,6 +8,7 @@ import { AppearanceSettingsForm } from '@/components/settings/AppearanceSettings
 import { NotificationSettingsForm } from '@/components/settings/NotificationSettingsForm';
 import { PrivacySettingsForm } from '@/components/settings/PrivacySettingsForm';
 import { VerificationSettingsForm } from '@/components/settings/VerificationSettingsForm';
+import { DeactivateSettingsForm } from '@/components/settings/DeactivateSettingsForm';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 
@@ -54,6 +55,7 @@ export default function SettingsPage() {
         { id: 'notifications', label: 'Notifications' },
         { id: 'appearance', label: 'Appearance' },
         { id: 'verification', label: 'Verification' },
+        { id: 'deactivate', label: 'Deactivate' },
     ];
 
     if (loading) return <div className="p-8">Loading settings...</div>;
@@ -98,12 +100,13 @@ export default function SettingsPage() {
                             exit={{ opacity: 0, x: -10 }}
                             transition={{ duration: 0.2 }}
                         >
-                            {activeTab === 'account' && <AccountSettingsForm user={user} onUpdate={(u) => { setUser(u); localStorage.setItem('user', JSON.stringify(u)); }} />}
+                            {activeTab === 'account' && <AccountSettingsForm user={user} />}
                             {activeTab === 'security' && <SecuritySettingsForm />}
                             {activeTab === 'privacy' && <PrivacySettingsForm settings={settings} />}
                             {activeTab === 'notifications' && <NotificationSettingsForm settings={settings} />}
                             {activeTab === 'appearance' && <AppearanceSettingsForm />}
                             {activeTab === 'verification' && <VerificationSettingsForm user={user} />}
+                            {activeTab === 'deactivate' && <DeactivateSettingsForm />}
                         </motion.div>
                     </AnimatePresence>
                 </div>

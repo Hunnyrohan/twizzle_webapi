@@ -9,10 +9,12 @@ import { motion } from 'framer-motion';
 
 interface AccountSettingsFormProps {
     user: any;
-    onUpdate: (user: any) => void;
 }
 
-export const AccountSettingsForm: React.FC<AccountSettingsFormProps> = ({ user, onUpdate }) => {
+import { useAuth } from '@/context/AuthContext';
+
+export const AccountSettingsForm: React.FC<AccountSettingsFormProps> = ({ user }) => {
+    const { updateUser } = useAuth();
     const [formData, setFormData] = useState({
         name: user?.name || '',
         username: user?.username || '',
@@ -32,7 +34,7 @@ export const AccountSettingsForm: React.FC<AccountSettingsFormProps> = ({ user, 
         setIsLoading(true);
         try {
             const res = await api.put('/users/profile', formData);
-            onUpdate(res.data.data);
+            updateUser(res.data.data);
             alert('Account updated successfully');
         } catch (error) {
             console.error(error);

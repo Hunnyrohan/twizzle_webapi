@@ -74,6 +74,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 >
                     <div className="relative pt-7 pb-3 px-6 min-h-[72px] flex items-center">
                         <input
+                            id={props.id || label?.toLowerCase().replace(/\s+/g, '-')}
                             type={type}
                             className={`
                                 block w-full bg-transparent border-0 p-0 
@@ -97,6 +98,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
 
                         {label && (
                             <label
+                                htmlFor={props.id || label.toLowerCase().replace(/\s+/g, '-')}
                                 className={`
                                     absolute left-6 transition-all duration-250 ease-[0.2,1,0.3,1] pointer-events-none
                                     ${isFloating

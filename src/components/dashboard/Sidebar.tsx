@@ -7,31 +7,21 @@ import { messageService, notificationService } from '@/services/api';
 import { useModal } from '@/context/ModalContext';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
+import { resolveImageUrl } from '@/lib/media-utils';
 
 interface SidebarProps {
     user?: { name: string; username: string };
 }
 
-export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
-    const { user: authUser } = useAuth();
-    const [user, setUser] = React.useState<{ name: string; username: string } | undefined>(initialUser || authUser || undefined);
+export const Sidebar: React.FC<SidebarProps> = () => {
+    // Always read directly from AuthContext — never use local state for user data
+    const { user } = useAuth();
     const [unreadMessages, setUnreadMessages] = React.useState(0);
     const [unreadNotifications, setUnreadNotifications] = React.useState(0);
     const { openPostModal } = useModal();
     const pathname = usePathname();
 
     React.useEffect(() => {
-        if (!user) {
-            const storedUser = localStorage.getItem('user');
-            if (storedUser) {
-                try {
-                    setUser(JSON.parse(storedUser));
-                } catch (e) { }
-            } else {
-                setUser({ name: 'Demo User', username: 'demo_user' });
-            }
-        }
-
         const fetchUnread = async () => {
             try {
                 const [msgCount, notifCount] = await Promise.all([
@@ -48,7 +38,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
         fetchUnread();
         const interval = setInterval(fetchUnread, 30000);
         return () => clearInterval(interval);
-    }, [authUser]);
+    }, []);
 
     const navItems = [
         { icon: Home, label: 'Home', href: '/dashboard' },
@@ -59,6 +49,9 @@ export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
         { icon: User, label: 'Profile', href: '/profile' },
         { icon: Settings, label: 'Settings', href: '/settings' },
     ];
+
+    const avatarUrl = resolveImageUrl((user as any)?.image) ||
+        (user ? `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}` : undefined);
 
     return (
         <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 border-r border-gray-200 dark:border-gray-800 px-4 py-6 bg-white dark:bg-black">
@@ -72,8 +65,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
                         key={item.label}
                         href={item.href}
                         className={`flex items-center space-x-4 px-4 py-3 text-xl font-medium rounded-full transition-colors ${pathname === item.href
-                                ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/10'
-                                : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900'
+                            ? 'text-blue-500 bg-blue-50 dark:bg-blue-900/10'
+                            : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-900'
                             }`}
                     >
                         <item.icon className="w-7 h-7" />
@@ -118,9 +111,13 @@ export const Sidebar: React.FC<SidebarProps> = ({ user: initialUser }) => {
                     className="flex items-center space-x-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-900 rounded-full cursor-pointer mt-auto transition-colors"
                 >
                     <img
-                        src={(user as any).image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                        src={avatarUrl}
                         alt={user.name}
                         className="w-10 h-10 rounded-full flex-shrink-0 object-cover bg-gray-200 dark:bg-gray-800 border dark:border-gray-700"
+                        onError={(e) => {
+                            // Fallback if image fails to load
+                            (e.target as HTMLImageElement).src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`;
+                        }}
                     />
                     <div className="flex-1 min-w-0">
                         <p className="font-bold text-gray-900 dark:text-white truncate">{user.name}</p>

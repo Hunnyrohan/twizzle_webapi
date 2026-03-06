@@ -83,7 +83,11 @@ export default function SignupForm() {
             router.push("/login?registered=true");
         } catch (error: any) {
             console.error("Signup error:", error);
-            alert(error.response?.data?.message || "Signup failed");
+            const errorMessage = error.response?.data?.error?.message ||
+                error.response?.data?.message ||
+                error.message ||
+                "Signup failed";
+            alert(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -124,13 +128,12 @@ export default function SignupForm() {
             </motion.div>
 
             <motion.div variants={itemVariants} className="flex justify-center mb-8">
-                <div className="w-full overflow-hidden rounded-xl bg-white p-[1px] shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-full overflow-hidden rounded-xl">
                     <GoogleLogin
                         onSuccess={handleGoogleSuccess}
                         onError={() => console.log('Login Failed')}
-                        useOneTap
-                        theme="outline"
-                        shape="rectangular"
+                        theme="filled_black"
+                        shape="pill"
                         width={380}
                     />
                 </div>

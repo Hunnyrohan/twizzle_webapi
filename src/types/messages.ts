@@ -22,6 +22,8 @@ export interface Message {
     };
     createdAt: string; // ISO string
     status: 'sent' | 'seen';
+    deletedFor?: string[];
+    isDeletedEveryone?: boolean;
 }
 
 export interface Conversation {

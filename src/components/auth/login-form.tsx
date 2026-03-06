@@ -11,6 +11,7 @@ import api from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 
 const loginSchema = z.object({
     identifier: z.string().min(1, "Phone number, email, or username is required"),
@@ -42,6 +43,7 @@ const itemVariants = {
 export default function LoginForm() {
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const router = useRouter();
+    const { login: authLogin } = useAuth();
 
     const {
         register,
@@ -57,13 +59,33 @@ export default function LoginForm() {
             const res = await api.post("/auth/login", data);
             const apiData = res.data.data || res.data;
 
-            if (apiData.token) localStorage.setItem('token', apiData.token);
-            if (apiData.user) localStorage.setItem('user', JSON.stringify(apiData.user));
+            if (apiData.needsReactivation) {
+                if (window.confirm(apiData.message || "Your account is deactivated. Reactivate and log in?")) {
+                    const reactivateRes = await api.post("/auth/login", { ...data, confirmReactivate: true });
+                    const reactivateData = reactivateRes.data.data || reactivateRes.data;
+
+                    if (reactivateData.token && reactivateData.user) {
+                        authLogin(reactivateData.token, reactivateData.user);
+                        router.push("/dashboard");
+                        return;
+                    }
+                }
+                setIsLoading(false);
+                return;
+            }
+
+            if (apiData.token && apiData.user) {
+                authLogin(apiData.token, apiData.user);
+            }
 
             router.push("/dashboard");
         } catch (error: any) {
             console.error("Login error:", error);
-            alert(error.response?.data?.error || "Login failed");
+            const errorMessage = error.response?.data?.error?.message ||
+                error.response?.data?.message ||
+                error.message ||
+                "Login failed";
+            alert(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -77,13 +99,33 @@ export default function LoginForm() {
             });
 
             const apiData = res.data.data || res.data;
-            if (apiData.token) localStorage.setItem('token', apiData.token);
-            if (apiData.user) localStorage.setItem('user', JSON.stringify(apiData.user));
+
+            if (apiData.needsReactivation) {
+                if (window.confirm(apiData.message || "Your account is deactivated. Reactivate and log in?")) {
+                    const reactivateRes = await api.post("/auth/google-login", {
+                        idToken: credentialResponse.credential,
+                        confirmReactivate: true
+                    });
+                    const reactivateData = reactivateRes.data.data || reactivateRes.data;
+
+                    if (reactivateData.token && reactivateData.user) {
+                        authLogin(reactivateData.token, reactivateData.user);
+                        router.push("/dashboard");
+                        return;
+                    }
+                }
+                setIsLoading(false);
+                return;
+            }
+
+            if (apiData.token && apiData.user) {
+                authLogin(apiData.token, apiData.user);
+            }
 
             router.push("/dashboard");
         } catch (error: any) {
             console.error("Google login error:", error);
-            alert(error.response?.data?.error || "Google login failed");
+            alert(error.response?.data?.error?.message || error.response?.data?.message || "Google login failed");
         } finally {
             setIsLoading(false);
         }
@@ -104,13 +146,12 @@ export default function LoginForm() {
             </motion.div>
 
             <motion.div variants={itemVariants} className="flex justify-center mb-8">
-                <div className="w-full overflow-hidden rounded-xl bg-white p-[1px] shadow-sm hover:shadow-md transition-shadow">
+                <div className="w-full overflow-hidden rounded-xl">
                     <GoogleLogin
                         onSuccess={handleGoogleSuccess}
                         onError={() => console.log('Login Failed')}
-                        useOneTap
-                        theme="outline"
-                        shape="rectangular"
+                        theme="filled_black"
+                        shape="pill"
                         width={380}
                     />
                 </div>

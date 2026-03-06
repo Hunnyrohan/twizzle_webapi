@@ -43,7 +43,7 @@ export default function AuthLayout({ children, closeUrl = "/" }: AuthLayoutProps
     };
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center p-4 z-50 overflow-y-auto bg-transparent">
+        <div className="fixed inset-0 flex items-center justify-center p-4 z-50 overflow-y-auto bg-transparent dark text-white">
             <Scene3D />
 
             {/* Subtle illumination */}
@@ -101,7 +101,7 @@ export default function AuthLayout({ children, closeUrl = "/" }: AuthLayoutProps
                         {/* Header Actions */}
                         <div className="px-8 h-[80px] flex items-center justify-between">
                             <div className="md:hidden flex items-center">
-                                <Image src="/twizzle-logo.png" alt="Logo" width={40} height={40} />
+                                <Image src="/twizzle-logo-new.png" alt="Logo" width={40} height={40} className="rounded-full" />
                             </div>
                             <div className="hidden md:block w-10" />
 

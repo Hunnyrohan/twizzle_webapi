@@ -4,6 +4,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import { User } from '@/types';
 import Link from 'next/link';
+import { resolveImageUrl } from '@/lib/media-utils';
 
 interface FollowListModalProps {
     isOpen: boolean;
@@ -41,7 +42,7 @@ export const FollowListModal: React.FC<FollowListModalProps> = ({ isOpen, onClos
                                         onClick={onClose}
                                     >
                                         <img
-                                            src={user.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
+                                            src={resolveImageUrl(user.image) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.username}`}
                                             alt={user.name}
                                             className="w-12 h-12 rounded-full border border-slate-200 dark:border-slate-700 object-cover"
                                         />

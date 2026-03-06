@@ -9,16 +9,18 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfileTabs } from '@/components/profile/ProfileTabs';
 import { EditProfileModal } from '@/components/profile/EditProfileModal';
 import { FollowListModal } from '@/components/profile/FollowListModal';
+import { useAuth } from '@/context/AuthContext';
 
 export default function UserProfilePage() {
     const params = useParams();
     const router = useRouter();
     const username = params.username as string;
+    const { user: currentUser, updateUser } = useAuth();
 
     const [user, setUser] = useState<User | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
-    const [currentUser, setCurrentUser] = useState<User | null>(null);
+    // const [currentUser, setCurrentUser] = useState<User | null>(null); // Removed local state
     const [activeTab, setActiveTab] = useState<'posts' | 'replies' | 'media' | 'likes'>('posts');
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -42,9 +44,7 @@ export default function UserProfilePage() {
                     fetchPosts(userData._id, 'posts');
                 }
 
-                // 3. Get Current User for auth check
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) setCurrentUser(JSON.parse(storedUser));
+                // 3. Removed local currentUser fetch
 
             } catch (error) {
                 console.error('Failed to load profile', error);
@@ -119,10 +119,9 @@ export default function UserProfilePage() {
 
     const handleProfileUpdate = (updatedUser: User) => {
         setUser(updatedUser);
-        // Also update current user in local storage if it's own profile
-        if (currentUser && currentUser.username === updatedUser.username) {
-            setCurrentUser(updatedUser);
-            localStorage.setItem('user', JSON.stringify(updatedUser));
+        // Also update current user in context if it's own profile
+        if (currentUser && (currentUser.username === updatedUser.username || (currentUser as any).id === (updatedUser as any).id || (currentUser as any)._id === (updatedUser as any)._id)) {
+            updateUser(updatedUser);
         }
     };
 

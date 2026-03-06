@@ -5,6 +5,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Notification } from '@/types/notifications';
 import { formatRelativeTime } from '@/utils/time';
+import { resolveImageUrl } from '@/lib/media-utils';
 import {
     Heart,
     UserPlus,
@@ -69,7 +70,15 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
         }
     };
 
-    const handleClick = () => {
+    const handleProfileClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!notification.isRead) {
+            onMarkAsRead(notification._id);
+        }
+        router.push(`/profile/${notification.actor.username}`);
+    };
+
+    const handleClick = (e?: React.MouseEvent) => {
         if (!notification.isRead) {
             onMarkAsRead(notification._id);
         }
@@ -79,8 +88,10 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
             router.push(`/profile/${notification.actor.username}`);
         } else if (notification.type === 'message') {
             router.push('/messages');
-        } else if (notification.postPreview) {
+        } else if (notification.postPreview?._id) {
             router.push(`/post/${notification.postPreview._id}`);
+        } else if (notification.postId) {
+            router.push(`/post/${notification.postId}`);
         }
     };
 
@@ -92,10 +103,14 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
         >
             <div className="flex gap-3">
                 {/* Actor Avatar */}
-                <div className="flex-shrink-0">
+                <div
+                    className="flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={handleProfileClick}
+                    title={`View @${notification.actor.username}'s profile`}
+                >
                     {notification.actor.image ? (
                         <img
-                            src={notification.actor.image}
+                            src={resolveImageUrl(notification.actor.image)}
                             alt={notification.actor.name}
                             className="w-10 h-10 rounded-full object-cover"
                         />
@@ -111,10 +126,16 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
                         <div className="mt-1">{getIcon()}</div>
                         <div className="flex-1">
                             <p className="text-sm">
-                                <span className="font-bold text-black dark:text-white">
+                                <span
+                                    className="font-bold text-black dark:text-white hover:underline cursor-pointer"
+                                    onClick={handleProfileClick}
+                                >
                                     {notification.actor.name}
                                 </span>{' '}
-                                <span className="text-gray-600 dark:text-gray-400">
+                                <span
+                                    className="text-gray-600 dark:text-gray-400 hover:text-blue-500 transition-colors cursor-pointer"
+                                    onClick={handleProfileClick}
+                                >
                                     @{notification.actor.username}
                                 </span>{' '}
                                 <span className="text-gray-700 dark:text-gray-300">
@@ -133,7 +154,7 @@ export const NotificationItem: React.FC<NotificationItemProps> = ({
                                     </p>
                                     {notification.postPreview.image && (
                                         <img
-                                            src={`http://localhost:5000/uploads/${notification.postPreview.image}`}
+                                            src={resolveImageUrl(notification.postPreview.image)}
                                             alt="Post preview"
                                             className="mt-2 rounded-lg w-20 h-20 object-cover"
                                         />

@@ -1,10 +1,10 @@
 'use client';
 
-import React from 'react';
 import { User } from '@/types';
 import { ArrowLeft, Calendar, Link as LinkIcon, MapPin, Mail } from 'lucide-react';
 import Link from 'next/link';
 import VerifiedBadge from '../common/VerifiedBadge';
+import { resolveImageUrl } from '@/lib/media-utils';
 
 interface ProfileHeaderProps {
     user: User;
@@ -38,7 +38,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, currentUser,
             {/* Banner */}
             <div className="h-48 bg-gray-200 relative">
                 {user.coverImage ? (
-                    <img src={user.coverImage} alt="Cover" className="w-full h-full object-cover" />
+                    <img src={resolveImageUrl(user.coverImage)} alt="Cover" className="w-full h-full object-cover" />
                 ) : (
                     <div className="w-full h-full bg-blue-100 dark:bg-gray-800" />
                 )}
@@ -49,7 +49,7 @@ export const ProfileHeader: React.FC<ProfileHeaderProps> = ({ user, currentUser,
                 <div className="flex justify-between items-start">
                     <div className="-mt-16 mb-4">
                         <img
-                            src={user.image || 'https://via.placeholder.com/150'}
+                            src={resolveImageUrl(user.image) || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=random&size=256`}
                             alt={user.name}
                             className="w-32 h-32 rounded-full border-4 border-white dark:border-black bg-white dark:bg-zinc-900 object-cover"
                         />

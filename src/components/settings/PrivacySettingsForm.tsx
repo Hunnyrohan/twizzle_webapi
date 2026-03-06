@@ -43,7 +43,7 @@ export const PrivacySettingsForm: React.FC<PrivacySettingsFormProps> = ({ settin
 
     const handleUnblock = async (userId: string) => {
         try {
-            await api.post(`/blocks/${userId}/toggle`);
+            await api.post(`/blocks/${userId}`);
             setBlocks(blocks.filter(b => b._id !== userId));
         } catch (error) {
             console.error('Failed to unblock', error);

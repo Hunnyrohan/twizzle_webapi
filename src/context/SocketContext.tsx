@@ -33,6 +33,13 @@ export const useSocket = () => {
     return context;
 };
 
+const getServerUrl = () => {
+    if (typeof window !== 'undefined') {
+        return `http://${window.location.hostname}:5000`;
+    }
+    return 'http://localhost:5000';
+};
+
 export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user } = useAuth();
     const [socket, setSocket] = useState<Socket | null>(null);
@@ -60,7 +67,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     const mediaPromiseRef = useRef<Promise<MediaStream> | null>(null);
 
     useEffect(() => {
-        const s = io('http://localhost:5000');
+        const s = io(getServerUrl());
         setSocket(s);
         return () => { s.close(); };
     }, []);
@@ -82,7 +89,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
             formData.append('callData', JSON.stringify({ type: callType, status, duration }));
 
             const token = localStorage.getItem('token');
-            const res = await fetch(`http://localhost:5000/api/messages/conversations/${conversationIdRef.current}/messages`, {
+            const res = await fetch(`${getServerUrl()}/api/messages/conversations/${conversationIdRef.current}/messages`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData

@@ -1,10 +1,13 @@
 import axios from 'axios';
 
 const api = axios.create({
-    baseURL: 'http://localhost:5000/api', // External Backend URL
+    baseURL: typeof window !== 'undefined'
+        ? `http://${window.location.hostname}:5000/api`
+        : 'http://localhost:5000/api', // External Backend URL
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true,
 });
 
 // Request interceptor to add auth token
@@ -33,8 +36,8 @@ api.interceptors.response.use(
 
 export const blockService = {
     toggleBlock: async (userId: string) => {
-        const response = await api.post(`/blocks/${userId}/toggle`);
-        return response.data.data;
+        const response = await api.post(`/blocks/${userId}`);
+        return response.data;
     }
 };
 

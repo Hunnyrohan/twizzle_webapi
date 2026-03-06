@@ -1,13 +1,16 @@
 import axios from 'axios';
 import { PaginatedResponse, SearchResult, HashtagTrend, Post, User } from '../types/explore';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+const API_URL = typeof window !== 'undefined'
+    ? `http://${window.location.hostname}:5000/api`
+    : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api');
 
 const api = axios.create({
     baseURL: API_URL,
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true,
 });
 
 api.interceptors.request.use(
@@ -109,6 +112,13 @@ export const messageService = {
         const response = await api.get<{ success: boolean; data: any }>( // using any for simplicity or import BookmarksResponse
             '/bookmarks',
             { params: { cursor, limit } }
+        );
+        return response.data.data;
+    },
+    deleteMessage: async (messageId: string, type: 'me' | 'everyone') => {
+        const response = await api.delete<{ success: boolean; data: { success: true } }>(
+            `/messages/${messageId}`,
+            { data: { type } }
         );
         return response.data.data;
     }

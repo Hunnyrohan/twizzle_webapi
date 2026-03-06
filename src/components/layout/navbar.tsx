@@ -13,11 +13,11 @@ export default function Navbar() {
             <div className="container mx-auto px-4 md:px-6 h-[70px] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                     <Image
-                        src="/twizzle-logo.png"
+                        src="/twizzle-logo-new.png"
                         alt="Twizzle Logo"
                         width={40}
                         height={40}
-                        className="w-8 h-8 md:w-10 md:h-10 object-contain"
+                        className="w-8 h-8 md:w-10 md:h-10 object-contain rounded-full"
                     />
                     <span className="text-xl font-bold tracking-tight hidden sm:block">Twizzle</span>
                 </div>

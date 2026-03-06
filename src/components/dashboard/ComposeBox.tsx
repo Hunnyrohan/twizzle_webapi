@@ -8,6 +8,7 @@ import { Post } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import MentionSuggestions from '../common/MentionSuggestions';
 import { User as UserType } from '@/types/explore';
+import { resolveImageUrl } from '@/lib/media-utils';
 
 interface ComposeBoxProps {
     onPostCreated: (post: Post) => void;
@@ -193,7 +194,7 @@ export const ComposeBox: React.FC<ComposeBoxProps> = ({ onPostCreated, user: pro
         >
             <div className="flex-shrink-0">
                 <img
-                    src={user?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'Guest'}`}
+                    src={resolveImageUrl(user?.image) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'Guest'}`}
                     alt={user?.name || 'User'}
                     className="w-14 h-14 rounded-full object-cover bg-gray-200 dark:bg-gray-800 ring-2 ring-gray-100 dark:ring-gray-900 shadow-sm transition-transform hover:scale-105"
                 />

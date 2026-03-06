@@ -20,6 +20,7 @@ export interface Notification {
     isRead: boolean;
     createdAt: string;
     actor: Actor;
+    postId?: string;
     postPreview?: PostPreview;
     commentText?: string;
 }

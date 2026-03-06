@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Heart, MessageCircle, Repeat, ExternalLink } from 'lucide-react';
+import { resolveImageUrl } from '@/lib/media-utils';
 import api from '@/lib/api';
 import { Post } from '@/types';
 
@@ -74,12 +75,10 @@ export const PostPreviewCard: React.FC<PostPreviewCardProps> = ({ postId, isMe }
     if (error || !post) return null;
 
     const author = post.author;
-    const avatarUrl = author?.image
-        ? (author.image.startsWith('http') ? author.image : `http://localhost:5000/${author.image}`)
-        : `https://ui-avatars.com/api/?name=${author?.name || 'U'}`;
+    const avatarUrl = resolveImageUrl(author?.image) || `https://ui-avatars.com/api/?name=${author?.name || 'U'}`;
 
     const mediaUrl = post.media && post.media.length > 0
-        ? (post.media[0].startsWith('http') ? post.media[0] : `http://localhost:5000/uploads/${post.media[0]}`)
+        ? resolveImageUrl(post.media[0])
         : null;
 
     return (

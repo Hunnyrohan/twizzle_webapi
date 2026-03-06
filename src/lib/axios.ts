@@ -1,7 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: typeof window !== "undefined"
+    ? `http://${window.location.hostname}:5000/api`
+    : "http://localhost:5000/api",
   withCredentials: true, // REQUIRED for cookies
   headers: {
     "Content-Type": "application/json",

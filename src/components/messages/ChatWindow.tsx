@@ -9,6 +9,8 @@ import { ArrowLeft, Info, MoreHorizontal, Video, Phone } from 'lucide-react';
 import { useSocket } from '@/context/SocketContext';
 import { useAuth } from '@/context/AuthContext';
 import { format } from 'date-fns';
+import { resolveImageUrl } from '@/lib/media-utils';
+import Link from 'next/link';
 
 interface ChatWindowProps {
     conversation: Conversation;
@@ -130,8 +132,19 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
 
         try {
             const sentMsg = await messageService.sendMessage(conversation.id, formData);
-            // Replace temp
-            setMessages(prev => prev.map(m => m.id === tempId ? sentMsg : m));
+            setMessages(prev => {
+                const realId = sentMsg._id || sentMsg.id;
+                // Check if the real message was already added by the WebSocket
+                const alreadyAddedBySocket = prev.some(m => (m._id || m.id) === realId && m.id !== tempId);
+
+                if (alreadyAddedBySocket) {
+                    // Socket already added it, just remove our optimistic temp
+                    return prev.filter(m => m.id !== tempId);
+                } else {
+                    // Replace temp with the real message
+                    return prev.map(m => m.id === tempId ? sentMsg : m);
+                }
+            });
             onMessageSent();
         } catch (error) {
             console.error('Failed to send', error);
@@ -149,6 +162,76 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
     const handleCall = async (type: 'audio' | 'video') => {
         await initiateCall(conversation.otherUser.id, conversation.otherUser.name, type, conversation.id, conversation.otherUser.isVerified, conversation.otherUser.image);
     };
+
+    // Helper to safely get string ID from senderId (which can be populated object or string)
+    const getSenderId = useCallback((msg: any) => {
+        if (!msg || !msg.senderId) return '';
+        if (typeof msg.senderId === 'string') return msg.senderId;
+        if (typeof msg.senderId === 'object') return msg.senderId._id || msg.senderId.id || '';
+        return String(msg.senderId);
+    }, []);
+
+    // Socket Listener for new messages
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleNewMessage = (payload: any) => {
+            const newMessage = payload.message || payload;
+            console.log('ChatWindow: Incoming socket message:', newMessage);
+
+            if (newMessage.conversationId === conversation.id) {
+                setMessages(prev => {
+                    const msgId = newMessage._id || newMessage.id;
+                    // Check for duplicates
+                    const isDuplicate = prev.some(m => {
+                        const existingId = m._id || m.id;
+                        return existingId === msgId;
+                    });
+
+                    if (isDuplicate) {
+                        console.log('ChatWindow: Duplicate message ignored:', msgId);
+                        return prev;
+                    }
+
+                    console.log('ChatWindow: Adding new message from socket to state');
+                    return [newMessage, ...prev];
+                });
+
+                messageService.markAsRead(conversation.id);
+            }
+        };
+
+        socket.on('new_message', handleNewMessage);
+
+        const handleMessageDeleted = (payload: any) => {
+            const { messageId, type, userId: deletedByUserId } = payload;
+            console.log('ChatWindow: Message deleted event:', payload);
+
+            setMessages(prev => {
+                if (type === 'everyone') {
+                    // Update the message to show "Removed"
+                    return prev.map(m => {
+                        const mid = m._id || m.id;
+                        if (mid === messageId) {
+                            return { ...m, text: 'This message was removed', isDeletedEveryone: true, attachments: [] };
+                        }
+                        return m;
+                    });
+                } else if (type === 'me' && deletedByUserId === currentUserId) {
+                    // Remove from local state if it was deleted for current user
+                    return prev.filter(m => (m._id || m.id) !== messageId);
+                }
+                return prev;
+            });
+        };
+
+        socket.on('message_deleted', handleMessageDeleted);
+
+        return () => {
+            socket.off('new_message', handleNewMessage);
+            socket.off('message_deleted', handleMessageDeleted);
+        };
+    }, [socket, conversation.id, currentUserId]);
 
     // Render order: 
     // We have [Newest, ..., Oldest]. 
@@ -171,10 +254,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                             <ArrowLeft size={20} className="dark:text-gray-100" />
                         </button>
                     )}
-                    <div className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-xl transition-colors cursor-pointer group">
+                    <Link
+                        href={`/profile/${conversation.otherUser.username}`}
+                        className="flex items-center p-1.5 hover:bg-gray-50 dark:hover:bg-gray-900 rounded-xl transition-colors cursor-pointer group"
+                    >
                         <div className="relative">
                             <img
-                                src={conversation.otherUser.image || `https://ui-avatars.com/api/?name=${conversation.otherUser.name}`}
+                                src={resolveImageUrl(conversation.otherUser.image) || `https://ui-avatars.com/api/?name=${conversation.otherUser.name}`}
                                 alt={conversation.otherUser.name}
                                 className="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-800 object-cover shadow-sm ring-2 ring-white dark:ring-black"
                             />
@@ -187,7 +273,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                             </h3>
                             <p className="text-xs text-gray-500 dark:text-gray-500 font-medium">@{conversation.otherUser.username}</p>
                         </div>
-                    </div>
+                    </Link>
                 </div>
                 <div className="flex items-center space-x-1">
                     <button onClick={() => handleCall('audio')} className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full transition-all">
@@ -217,9 +303,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                 ) : (
                     <>
                         {messages.map((msg, index) => {
-                            const isMe = msg.senderId?.toString() === currentUserId?.toString();
+                            const senderId = getSenderId(msg);
+                            const isMe = senderId === currentUserId;
                             const prevMsg = messages[index + 1];
-                            const showAvatar = !isMe && (!prevMsg || prevMsg.senderId !== msg.senderId);
+                            const showAvatar = !isMe && (!prevMsg || getSenderId(prevMsg) !== senderId);
 
                             // Date separator (optional)
                             // If index is last (oldest), show date. 
@@ -237,7 +324,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
                                             </span>
                                         </div>
                                     )}
-                                    <MessageBubble message={msg} isMe={isMe} showAvatar={showAvatar} />
+                                    <MessageBubble
+                                        message={msg}
+                                        isMe={isMe}
+                                        showAvatar={showAvatar}
+                                        onDelete={(id, type) => {
+                                            if (type === 'me') {
+                                                setMessages(prev => prev.filter(m => (m._id || m.id) !== id));
+                                            } else {
+                                                setMessages(prev => prev.map(m => {
+                                                    if ((m._id || m.id) === id) {
+                                                        return { ...m, text: 'This message was removed', isDeletedEveryone: true, attachments: [] };
+                                                    }
+                                                    return m;
+                                                }));
+                                            }
+                                        }}
+                                    />
                                 </div>
                             );
                         })}

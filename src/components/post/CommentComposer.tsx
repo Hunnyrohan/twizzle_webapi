@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { resolveImageUrl } from '@/lib/media-utils';
 import api from '@/lib/api';
 import { Loader2 } from 'lucide-react';
 import { User, Comment } from '@/types';
@@ -44,7 +45,7 @@ export const CommentComposer: React.FC<CommentComposerProps> = ({ postId, curren
         <div className="p-4 border-b border-gray-200 dark:border-gray-800 flex space-x-3">
             <div className="flex-shrink-0">
                 <img
-                    src={currentUser.image || 'https://via.placeholder.com/150'}
+                    src={resolveImageUrl(currentUser.image) || 'https://via.placeholder.com/150'}
                     alt={currentUser.name}
                     className="w-10 h-10 rounded-full object-cover"
                 />

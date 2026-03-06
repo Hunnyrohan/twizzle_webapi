@@ -1,7 +1,9 @@
 import React from 'react';
 import { Conversation } from '@/types/messages';
 import { formatDistanceToNow } from 'date-fns';
+import { useRouter } from 'next/navigation';
 import VerifiedBadge from '../common/VerifiedBadge';
+import { resolveImageUrl } from '@/lib/media-utils';
 
 interface ConversationItemProps {
     conversation: Conversation;
@@ -11,6 +13,12 @@ interface ConversationItemProps {
 
 export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation, isActive, onClick }) => {
     const { otherUser, lastMessage, unreadCount, updatedAt } = conversation;
+    const router = useRouter();
+
+    const handleProfileClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        router.push(`/profile/${otherUser.username}`);
+    };
 
     return (
         <div
@@ -24,9 +32,9 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
                 <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500 rounded-r-full shadow-lg shadow-blue-500/50" />
             )}
 
-            <div className="relative flex-shrink-0">
+            <div className="relative flex-shrink-0" onClick={handleProfileClick}>
                 <img
-                    src={otherUser.image || `https://ui-avatars.com/api/?name=${otherUser.name}`}
+                    src={resolveImageUrl(otherUser.image) || `https://ui-avatars.com/api/?name=${otherUser.name}`}
                     alt={otherUser.name}
                     className={`w-14 h-14 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-black transition-transform duration-300 group-hover:scale-105 ${isActive ? 'ring-blue-100 dark:ring-blue-900/30' : 'bg-gray-200 dark:bg-gray-800'
                         }`}
@@ -37,7 +45,10 @@ export const ConversationItem: React.FC<ConversationItemProps> = ({ conversation
 
             <div className="ml-3.5 flex-1 min-w-0">
                 <div className="flex justify-between items-center">
-                    <h4 className={`font-bold truncate text-[15px] flex items-center gap-1 ${unreadCount > 0 ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}>
+                    <h4
+                        onClick={handleProfileClick}
+                        className={`font-bold truncate text-[15px] flex items-center gap-1 hover:text-blue-500 transition-colors ${unreadCount > 0 ? 'text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'}`}
+                    >
                         {otherUser.name}
                         {otherUser.isVerified && <VerifiedBadge size={14} />}
                     </h4>

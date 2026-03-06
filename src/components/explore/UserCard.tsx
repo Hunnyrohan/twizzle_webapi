@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { exploreService } from '../../services/api';
 import VerifiedBadge from '../common/VerifiedBadge';
 
+import { resolveImageUrl } from '@/lib/media-utils';
 import Link from 'next/link';
 
 interface UserCardProps {
@@ -16,7 +17,7 @@ const UserCard: React.FC<UserCardProps> = ({ user }) => {
     // Resolve fields (handling both frontend type and backend response)
     const displayName = user.displayName || user.name || user.username;
     const username = user.username;
-    const avatarUrl = user.avatarUrl || user.image || `https://ui-avatars.com/api/?name=${username}`;
+    const avatarUrl = resolveImageUrl(user.avatarUrl || user.image) || `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=random`;
     const userId = user.id || user._id;
     const isVerified = user.verified || user.isVerified;
 

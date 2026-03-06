@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 import MentionSuggestions from '../common/MentionSuggestions';
 import { User as UserType } from '@/types/explore';
+import { resolveImageUrl } from '@/lib/media-utils';
 
 export function PostComposer() {
     const { user } = useAuth();
@@ -140,7 +141,7 @@ export function PostComposer() {
             <div className="flex gap-4">
                 <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
                     <img
-                        src={user?.image || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'Guest'}`}
+                        src={resolveImageUrl(user?.image) || `https://api.dicebear.com/7.x/avataaars/svg?seed=${user?.username || 'Guest'}`}
                         alt={user?.name || 'User'}
                         className="w-full h-full object-cover"
                     />

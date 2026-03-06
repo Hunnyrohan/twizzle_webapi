@@ -105,6 +105,7 @@ export const Feed: React.FC = () => {
                         key={post._id}
                         post={post}
                         onDelete={(postId) => setPosts(prev => prev.filter(p => p._id !== postId))}
+                        onBlockUser={(userId) => setPosts(prev => prev.filter(p => p.author._id !== userId && (p.retweetOf as any)?.author?._id !== userId))}
                     />
                 ))}
             </div>

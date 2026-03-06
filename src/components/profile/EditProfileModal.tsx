@@ -4,6 +4,7 @@ import React, { useState, useRef } from 'react';
 import { User } from '@/types';
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import { resolveImageUrl } from '@/lib/media-utils';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { X, Camera } from 'lucide-react';
@@ -137,7 +138,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ user, isOpen
                     {/* Cover Image */}
                     <div className="h-32 bg-gray-200 relative group cursor-pointer">
                         {coverPreview ? (
-                            <img src={coverPreview} alt="Cover" className="w-full h-full object-cover" />
+                            <img src={resolveImageUrl(coverPreview)} alt="Cover" className="w-full h-full object-cover" />
                         ) : (
                             <div className="w-full h-full bg-blue-100" />
                         )}
@@ -159,7 +160,7 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({ user, isOpen
                     <div className="px-4 relative mb-4">
                         <div className="-mt-16 w-32 h-32 rounded-full border-4 border-white dark:border-black overflow-hidden relative group cursor-pointer">
                             <img
-                                src={avatarPreview || 'https://via.placeholder.com/150'}
+                                src={resolveImageUrl(avatarPreview) || 'https://via.placeholder.com/150'}
                                 alt="Avatar"
                                 className="w-full h-full object-cover bg-white"
                             />

@@ -39,7 +39,7 @@ export default function Home() {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
               <Link href="/signup" className="w-full sm:w-auto">
-                <Button size="lg" className="h-14 px-10 rounded-full text-lg font-bold bg-black dark:bg-white text-white dark:text-black hover:scale-105 transition-transform w-full sm:w-auto">
+                <Button size="lg" className="h-14 px-10 rounded-full text-lg font-bold bg-black dark:bg-white text-white dark:text-black hover:bg-gray-900 dark:hover:bg-gray-100 hover:scale-105 transition-all w-full sm:w-auto">
                   Start for free
                   <ArrowRight className="ml-2 w-5 h-5" />
                 </Button>
